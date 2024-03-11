@@ -1,0 +1,83 @@
+#ifndef LITETEST_H
+#define LITETEST_H
+
+#include "internal.h"
+
+namespace litetest {
+
+/**
+ * Defines a test suite.
+ * A test suite consists in a named group of test cases.
+ * Each test suite may contain a setup or a cleanup procedure, defined
+ * respectively by SUITE_SETUP() and SUITE_CLEANUP(). These procedures are
+ * guaranteed to be invoked before and after all test cases from the suite
+ * are executed.
+ */
+#define TEST_SUITE(name) \
+    static auto s_suite##name = []() { \
+        return litetest::internal::push_suite(#name, __FILE__, __LINE__); \
+    }()
+
+/**
+ * Defines a test case.
+ * A test case must be preceded by a declaration of a test suite.
+ */
+#define TEST_CASE(name) \
+    static void case_##name(); \
+    static auto s_case_##name = []() { \
+        return litetest::internal::push_case(#name, case_##name, __FILE__, __LINE__); \
+    }(); \
+    static void case_##name()
+
+#define SUITE_SETUP(suite_name) \
+    static void setup_##suite_name(); \
+    static auto s_suite_setup_##suite_name = []() { \
+        return litetest::internal::push_suite_setup(#suite_name, __FILE__, setup_##suite_name);  \
+    }();                                            \
+    static void setup_##suite_name() \
+
+#define SUITE_CLEANUP(suite_name) \
+    static void cleanup_##suite_name(); \
+    static auto s_suite_cleanup_##suite_name = []() {                     \
+        return litetest::internal::push_suite_cleanup(#suite_name, __FILE__, cleanup_##suite_name);  \
+    }(); \
+    static void cleanup_##suite_name() \
+
+
+template <typename T>
+internal::ExpectValue<T> expect(const T& val) {
+    return internal::ExpectValue(val);
+}
+
+enum LogMode {
+    NO_LOGGING,
+    LOG_BASIC
+};
+
+struct RunTestsArgs {
+    LogMode log_mode = NO_LOGGING;
+};
+
+struct RunTestsResults {
+
+    /** Number of cases that were executed. */
+    int n_cases_executed = 0;
+
+    /** Number of test cases that finished without failing. */
+    int n_cases_passed = 0;
+
+    /** Number of test cases that threw an exception that wasn't TestFailure. */
+    int n_cases_incomplete = 0;
+};
+
+RunTestsResults run_tests(RunTestsArgs args = {});
+
+/**
+ * If desired, litetest_main automatically performs all tests and logs results to stdout.
+ * Returns the number of failed + incomplete cases.
+ */
+int litetest_main(int argc, char* argv[]);
+
+}
+
+#endif // LITETEST_H

@@ -1,0 +1,130 @@
+#ifndef ILLUMINA_INTERNAL_H
+#define ILLUMINA_INTERNAL_H
+
+#include <vector>
+#include <sstream>
+#include <string>
+#include <functional>
+#include <stdexcept>
+#include <optional>
+#include <thread>
+
+namespace litetest::internal {
+
+struct TestCase {
+    std::string name;
+    std::function<void()> function;
+    std::string src_file;
+    int line;
+};
+
+struct TestSuite {
+    std::string name;
+    std::string src_file;
+    int line;
+    std::function<void()> setup   = [](){};
+    std::function<void()> cleanup = [](){};
+    std::vector<TestCase*> cases;
+};
+
+struct TestFailure : public std::runtime_error {
+    std::string test_case;
+    std::string test_suite;
+
+    inline TestFailure(const std::string& message,
+                       const std::string& test_case,
+                       const std::string& test_suite)
+        : std::runtime_error(message),
+          test_case(test_case), test_suite(test_suite) {}
+};
+
+TestCase* push_case(const std::string&, std::function<void()>, const std::string&, int);
+
+TestSuite* push_suite(const std::string&, const std::string&, int);
+
+std::function<void()> push_suite_setup(const std::string&, const std::string&, std::function<void()>);
+
+std::function<void()> push_suite_cleanup(const std::string&, const std::string&, std::function<void()>);
+
+std::vector<TestSuite*> process_suites();
+
+const TestCase& current_case(std::thread::id = std::this_thread::get_id());
+
+const TestSuite& current_suite(std::thread::id = std::this_thread::get_id());
+
+template<typename T>
+class ExpectValue {
+public:
+    void to_be(const T& other) const {
+        if (m_val == other) {
+            return;
+        }
+
+        std::stringstream ss;
+        ss << "Expected " << other << ", got " << m_val;
+        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+    }
+
+    void to_be_different_than(const T& other) const {
+        if (m_val != other) {
+        }
+
+        std::stringstream ss;
+        ss << "Expected " << m_val << " to be different.";
+        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+
+    }
+
+    void to_be_greater_than(const T& other) const {
+        if (m_val > other) {
+            return;
+        }
+
+        std::stringstream ss;
+        ss << "Expected value to be greater than " << other << ", got " << m_val;
+        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+    }
+
+    void to_be_less_than(const T& other) const {
+        if (m_val < other) {
+            return;
+        }
+
+        std::stringstream ss;
+        ss << "Expected value to be less than " << other << ", got " << m_val;
+        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+    }
+
+    void to_be_greater_than_or_equal_to(const T& other) const {
+        if (m_val >= other) {
+            return;
+        }
+
+        std::stringstream ss;
+        ss << "Expected value to be greater than or equal to " << other << ", got " << m_val;
+        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+    }
+
+    void to_be_less_than_or_equal_to(const T& other) const {
+        if (m_val <= other) {
+            return;
+        }
+
+        std::stringstream ss;
+        ss << "Expected value to be less than or equal to " << other << ", got " << m_val;
+        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+    }
+
+    explicit ExpectValue(const T& val)
+        : m_val(val) {}
+
+    explicit ExpectValue(T&& val)
+        : m_val(std::move(val)) {}
+
+private:
+    T m_val;
+};
+
+}
+
+#endif // ILLUMINA_INTERNAL_H
