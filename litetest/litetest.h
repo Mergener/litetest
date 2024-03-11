@@ -82,7 +82,7 @@ namespace litetest {
  *      EXPECT(cost_of("something")).to_be_greater_than(200);
  *
  */
-#define EXPECT(value) (ExpectValue(value, __LINE__))
+#define EXPECT(value) (::litetest::internal::ExpectValue(value, __LINE__))
 
 /**
  * Test arguments to be passed to run_tests().
