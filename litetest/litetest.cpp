@@ -201,9 +201,10 @@ RunTestsResults run_tests(RunTestsArgs args) {
                 passed = true;
             }
             catch (const TestFailure& test_failure) {
-                std::cerr << "Test case '" << test_case->name << "' failed:\n\t" << test_failure.what() << std::endl;
+                std::cout << "Test case '" << test_case->name << "' (assertion at line " << test_failure.line << ") failed:\n\t" << test_failure.what() << std::endl;
             }
             catch (const std::exception& e) {
+                std::cerr << "Test case '" << test_case->name << "' threw an unexpected exception:\n" << e.what() << std::endl;
                 results.n_cases_incomplete++;
             }
 
