@@ -64,7 +64,7 @@ public:
 
         std::stringstream ss;
         ss << "Expected " << other << ", got " << m_val;
-        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
     void to_not_be(const T& other) const {
@@ -74,7 +74,7 @@ public:
 
         std::stringstream ss;
         ss << "Expected " << m_val << " to be different.";
-        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
 
     }
 
@@ -85,7 +85,7 @@ public:
 
         std::stringstream ss;
         ss << "Expected value to be greater than " << other << ", got " << m_val;
-        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
     void to_be_less_than(const T& other) const {
@@ -95,7 +95,7 @@ public:
 
         std::stringstream ss;
         ss << "Expected value to be less than " << other << ", got " << m_val;
-        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
     void to_be_greater_than_or_equal_to(const T& other) const {
@@ -105,7 +105,7 @@ public:
 
         std::stringstream ss;
         ss << "Expected value to be greater than or equal to " << other << ", got " << m_val;
-        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
     void to_be_less_than_or_equal_to(const T& other) const {
@@ -115,7 +115,7 @@ public:
 
         std::stringstream ss;
         ss << "Expected value to be less than or equal to " << other << ", got " << m_val;
-        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
     ExpectValue(const T& val, int line)
