@@ -72,20 +72,17 @@ namespace litetest {
 
 
 /**
- * Main function for testing. Receives a value to be tested against other values
+ * Main macro for testing. Receives a value to be tested against other values
  * or by itself. Fails the current test case by throwing TestFailure if the requested
  * test fails.
  *
  * Usage examples:
- *      expect(foo()).to_be("some expected string");
- *      expect(sum(5,2)).to_be(7);
- *      expect(cost_of("something")).to_be_greater_than(200);
+ *      EXPECT(foo()).to_be("some expected string");
+ *      EXPECT(sum(5,2)).to_be(7);
+ *      EXPECT(cost_of("something")).to_be_greater_than(200);
  *
  */
-template <typename T>
-internal::ExpectValue<T> expect(const T& val) {
-    return internal::ExpectValue(val);
-}
+#define EXPECT(value) (ExpectValue(value, __LINE__))
 
 /**
  * Test arguments to be passed to run_tests().

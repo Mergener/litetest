@@ -30,11 +30,13 @@ struct TestSuite {
 struct TestFailure : public std::runtime_error {
     std::string test_case;
     std::string test_suite;
+    int line;
 
     inline TestFailure(const std::string& message,
                        const std::string& test_case,
-                       const std::string& test_suite)
-        : std::runtime_error(message),
+                       const std::string& test_suite,
+                       int line = 0)
+        : std::runtime_error(message), line(line),
           test_case(test_case), test_suite(test_suite) {}
 };
 
@@ -62,16 +64,17 @@ public:
 
         std::stringstream ss;
         ss << "Expected " << other << ", got " << m_val;
-        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
     }
 
-    void to_be_different_than(const T& other) const {
+    void to_not_be(const T& other) const {
         if (m_val != other) {
+            return;
         }
 
         std::stringstream ss;
         ss << "Expected " << m_val << " to be different.";
-        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
 
     }
 
@@ -82,7 +85,7 @@ public:
 
         std::stringstream ss;
         ss << "Expected value to be greater than " << other << ", got " << m_val;
-        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
     }
 
     void to_be_less_than(const T& other) const {
@@ -92,7 +95,7 @@ public:
 
         std::stringstream ss;
         ss << "Expected value to be less than " << other << ", got " << m_val;
-        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
     }
 
     void to_be_greater_than_or_equal_to(const T& other) const {
@@ -102,7 +105,7 @@ public:
 
         std::stringstream ss;
         ss << "Expected value to be greater than or equal to " << other << ", got " << m_val;
-        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
     }
 
     void to_be_less_than_or_equal_to(const T& other) const {
@@ -112,17 +115,18 @@ public:
 
         std::stringstream ss;
         ss << "Expected value to be less than or equal to " << other << ", got " << m_val;
-        throw TestFailure(ss.str(), current_case().name, current_suite().name);
+        throw TestFailure(ss.str(), current_case().name, current_suite().name, line);
     }
 
-    explicit ExpectValue(const T& val)
-        : m_val(val) {}
+    ExpectValue(const T& val, int line)
+        : m_val(val), m_line(line) {}
 
-    explicit ExpectValue(T&& val)
-        : m_val(std::move(val)) {}
+    ExpectValue(T&& val, int line)
+        : m_val(std::move(val)), m_line(line) {}
 
 private:
     T m_val;
+    int m_line;
 };
 
 }
