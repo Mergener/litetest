@@ -220,7 +220,6 @@ RunTestsResults run_tests(RunTestsArgs args) {
 
 int litetest_main(int argc, char* argv[]) {
     RunTestsArgs args;
-    args.log_mode = LOG_BASIC;
 
     RunTestsResults results = run_tests(args);
 
