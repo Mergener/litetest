@@ -1,6 +1,7 @@
 #ifndef ILLUMINA_INTERNAL_H
 #define ILLUMINA_INTERNAL_H
 
+#include <atomic>
 #include <vector>
 #include <sstream>
 #include <string>
@@ -54,10 +55,13 @@ const TestCase& current_case(std::thread::id = std::this_thread::get_id());
 
 const TestSuite& current_suite(std::thread::id = std::this_thread::get_id());
 
+extern std::atomic_int g_assert_count;
+
 template<typename T>
 class ExpectValue {
 public:
     void to_be(const T& other) const {
+        g_assert_count++;
         if (m_val == other) {
             return;
         }
@@ -68,17 +72,19 @@ public:
     }
 
     void to_not_be(const T& other) const {
+        g_assert_count++;
         if (m_val != other) {
             return;
         }
 
         std::stringstream ss;
-        ss << "Expected " << m_val << " to be different.";
+        ss << "Expected " << m_val << " to be different";
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
 
     }
 
     void to_be_greater_than(const T& other) const {
+        g_assert_count++;
         if (m_val > other) {
             return;
         }
@@ -89,6 +95,7 @@ public:
     }
 
     void to_be_less_than(const T& other) const {
+        g_assert_count++;
         if (m_val < other) {
             return;
         }
@@ -99,6 +106,7 @@ public:
     }
 
     void to_be_greater_than_or_equal_to(const T& other) const {
+        g_assert_count++;
         if (m_val >= other) {
             return;
         }
@@ -109,6 +117,7 @@ public:
     }
 
     void to_be_less_than_or_equal_to(const T& other) const {
+        g_assert_count++;
         if (m_val <= other) {
             return;
         }
