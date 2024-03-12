@@ -60,7 +60,7 @@ extern std::atomic_int g_assert_count;
 template<typename T>
 class ExpectValue {
 public:
-    ExpectValue& to_be(const T& other) const {
+    const ExpectValue& to_be(const T& other) const {
         g_assert_count++;
         if (m_val == other) {
             return *this;
@@ -71,7 +71,7 @@ public:
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
-    ExpectValue& to_not_be(const T& other) const {
+    const ExpectValue& to_not_be(const T& other) const {
         g_assert_count++;
         if (m_val != other) {
             return *this;
@@ -83,7 +83,7 @@ public:
 
     }
 
-    ExpectValue& to_be_greater_than(const T& other) const {
+    const ExpectValue& to_be_greater_than(const T& other) const {
         g_assert_count++;
         if (m_val > other) {
             return *this;
@@ -94,7 +94,7 @@ public:
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
-    ExpectValue& to_be_less_than(const T& other) const {
+    const ExpectValue& to_be_less_than(const T& other) const {
         g_assert_count++;
         if (m_val < other) {
             return *this;
@@ -105,7 +105,7 @@ public:
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
-    ExpectValue& to_be_greater_than_or_equal_to(const T& other) const {
+    const ExpectValue& to_be_greater_than_or_equal_to(const T& other) const {
         g_assert_count++;
         if (m_val >= other) {
             return *this;
@@ -116,7 +116,7 @@ public:
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
-    ExpectValue& to_be_less_than_or_equal_to(const T& other) const {
+    const ExpectValue& to_be_less_than_or_equal_to(const T& other) const {
         g_assert_count++;
         if (m_val <= other) {
             return *this;
