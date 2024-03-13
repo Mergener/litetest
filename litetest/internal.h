@@ -1,5 +1,5 @@
-#ifndef ILLUMINA_INTERNAL_H
-#define ILLUMINA_INTERNAL_H
+#ifndef LITETEST_INTERNAL_H
+#define LITETEST_INTERNAL_H
 
 #include <atomic>
 #include <vector>
@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <optional>
 #include <thread>
+
+#include "stringify.h"
 
 namespace litetest::internal {
 
@@ -67,7 +69,7 @@ public:
         }
 
         std::stringstream ss;
-        ss << "Expected " << other << ", got " << m_val;
+        ss << "Expected " << stringify(other) << ", got " << stringify(m_val);
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
@@ -78,7 +80,7 @@ public:
         }
 
         std::stringstream ss;
-        ss << "Expected " << m_val << " to be different";
+        ss << "Expected " << stringify(m_val) << " to be different";
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
 
     }
@@ -90,7 +92,7 @@ public:
         }
 
         std::stringstream ss;
-        ss << "Expected value to be greater than " << other << ", got " << m_val;
+        ss << "Expected value to be greater than " << stringify(other) << ", got " << stringify(m_val);
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
@@ -101,7 +103,7 @@ public:
         }
 
         std::stringstream ss;
-        ss << "Expected value to be less than " << other << ", got " << m_val;
+        ss << "Expected value to be less than " << stringify(other) << ", got " << stringify(m_val);
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
@@ -112,7 +114,7 @@ public:
         }
 
         std::stringstream ss;
-        ss << "Expected value to be greater than or equal to " << other << ", got " << m_val;
+        ss << "Expected value to be greater than or equal to " << stringify(other) << ", got " << stringify(m_val);
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
@@ -123,7 +125,7 @@ public:
         }
 
         std::stringstream ss;
-        ss << "Expected value to be less than or equal to " << other << ", got " << m_val;
+        ss << "Expected value to be less than or equal to " << stringify(other) << ", got " << stringify(m_val);
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
@@ -140,4 +142,4 @@ private:
 
 }
 
-#endif // ILLUMINA_INTERNAL_H
+#endif // LITETEST_INTERNAL_H
