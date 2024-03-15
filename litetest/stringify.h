@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <string>
+#include <cstdint>
 
 namespace litetest {
 
@@ -29,6 +30,27 @@ inline std::string stringify(const unsigned char& val) {
 template <>
 inline std::string stringify(const char& val) {
     return stringify<unsigned char>(val);
+}
+
+template <>
+inline std::string stringify(const uint64_t & val) {
+    std::stringstream ss;
+
+    ss << "0x" << std::hex << val;
+    return ss.str();
+}
+
+template <>
+inline std::string stringify(const int64_t& val) {
+    std::stringstream ss;
+
+    if (val > 0) {
+        ss << "0x" << std::hex << val;
+    }
+    else {
+        ss << "-0x" << std::hex << std::abs(val);
+    }
+    return ss.str();
 }
 
 } // litetest
