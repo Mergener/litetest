@@ -178,11 +178,8 @@ const TestSuite& current_suite(std::thread::id thread_id) {
     return *s_current_suite.at(thread_id);
 }
 
-<<<<<<< HEAD
-=======
 std::atomic_int g_assert_count = 0;
 
->>>>>>> main
 } // internal
 using namespace internal;
 
