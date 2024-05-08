@@ -87,7 +87,13 @@ namespace litetest {
 /**
  * Test arguments to be passed to run_tests().
  */
-struct RunTestsArgs {};
+struct RunTestsArgs {
+    /**
+     * Test suites, by name, to be executed.
+     * If none is specified, assumes all test suites must be executed.
+     */
+    std::vector<std::string> suites;
+};
 
 struct RunTestsResults {
 

@@ -178,16 +178,27 @@ const TestSuite& current_suite(std::thread::id thread_id) {
     return *s_current_suite.at(thread_id);
 }
 
-
 } // internal
+using namespace internal;
+
+static bool has_suite_in_args(const RunTestsArgs& args,
+                              const std::string& suite_name) {
+    return args.suites.empty() ||
+           std::any_of(args.suites.begin(), args.suites.end(), [&suite_name](const std::string& name) {
+               return name == suite_name;
+           });
+}
 
 RunTestsResults run_tests(RunTestsArgs args) {
-    using namespace internal;
-
     RunTestsResults results;
 
     auto suites = process_suites();
     for (TestSuite* suite: suites) {
+        // We might want to skip some suites if the user says so.
+        if (!has_suite_in_args(args, suite->name)) {
+            continue;
+        }
+
         s_current_suite[std::this_thread::get_id()] = suite;
         suite->setup();
 
@@ -219,10 +230,114 @@ RunTestsResults run_tests(RunTestsArgs args) {
     return results;
 }
 
-int litetest_main(int argc, char* argv[]) {
-    RunTestsArgs args;
+enum class ExecutionMode {
+    NORMAL,
+    LIST_SUITES,
+    UNKNOWN
+};
 
-    RunTestsResults results = run_tests(args);
+struct Argument {
+    std::string name;
+    std::vector<std::string> parameters;
+};
+
+class ProgramArgs {
+public:
+    ProgramArgs(int argc, char* argv[]);
+
+    ExecutionMode exec_mode() const;
+    const std::string& exec_path() const;
+    bool has_arg(const std::string& arg_name) const;
+    std::optional<Argument> get_arg(const std::string& arg_name) const;
+
+private:
+    ExecutionMode m_mode;
+    std::string m_exec_path;
+    std::unordered_map<std::string, Argument> m_args;
+};
+
+ProgramArgs::ProgramArgs(int argc, char** argv) {
+    m_mode = ExecutionMode::NORMAL;
+    m_exec_path = argv[0];
+
+    if (argc <= 1) {
+        return;
+    }
+
+    argc--; argv++;
+
+    // Check for alternative execution modes.
+    std::string first_arg = argv[0];
+    if (first_arg[0] != '-') {
+        // User has specified an execution mode.
+        std::unordered_map<std::string, ExecutionMode> exec_modes {
+            { "suites", ExecutionMode::LIST_SUITES }
+        };
+        auto it = exec_modes.find(first_arg);
+        if (it == exec_modes.end()) {
+            m_mode = ExecutionMode::UNKNOWN;
+        }
+        else {
+            m_mode = it->second;
+        }
+
+        // We'll parse arguments afterwards, so ignore this first one when
+        // we do it.
+        argc--; argv++;
+    }
+
+    // Parse specified arguments.
+    std::string current_arg;
+    for (int i = 0; i < argc; ++i) {
+        std::string s = std::string(argv[i]);
+        if (s[0] == '-') {
+            // We're dealing with an argument.
+            // Check if it's a parameterized arg.
+            if (s.size() > 1 && s[1] == '-') {
+                // Not parameterized (--arg).
+                current_arg = s.substr(2);
+            }
+            else {
+                // Parameterized (-arg).
+                current_arg = s.substr(1);
+            }
+            m_args[current_arg].name = current_arg;
+        }
+        else {
+            // We're dealing with an argument's parameter.
+            m_args[current_arg].parameters.push_back(s);
+        }
+    }
+}
+
+const std::string& ProgramArgs::exec_path() const {
+    return m_exec_path;
+}
+
+std::optional<Argument> ProgramArgs::get_arg(const std::string& arg_name) const {
+    auto it = m_args.find(arg_name);
+    if (it == m_args.end()) {
+        return std::nullopt;
+    }
+    return it->second;
+}
+
+ExecutionMode ProgramArgs::exec_mode() const {
+    return m_mode;
+}
+
+bool ProgramArgs::has_arg(const std::string& arg_name) const {
+    return get_arg(arg_name).has_value();
+}
+
+static int run_mode_normal(const ProgramArgs& args) {
+    RunTestsArgs test_args;
+
+    if (args.has_arg("only")) {
+        test_args.suites = args.get_arg("only")->parameters;
+    }
+
+    RunTestsResults results = run_tests(test_args);
 
     std::cout.flush();
     std::cerr.flush();
@@ -234,6 +349,33 @@ int litetest_main(int argc, char* argv[]) {
     }
 
     return results.n_cases_executed - results.n_cases_passed;
+}
+
+static int run_mode_list_suites(const ProgramArgs& args) {
+    auto suites = process_suites();
+    for (const TestSuite* suite: suites) {
+        std::cout << suite->name << std::endl;
+    }
+    return 0;
+}
+
+int litetest_main(int argc, char* argv[]) {
+    ProgramArgs args(argc, argv);
+
+    try {
+        switch (args.exec_mode()) {
+            case ExecutionMode::LIST_SUITES:
+                return run_mode_list_suites(args);
+            case ExecutionMode::NORMAL:
+                return run_mode_normal(args);
+            default:
+                throw std::invalid_argument("Unknown execution mode.");
+        }
+    }
+    catch (const std::exception& err) {
+        std::cerr << "Fatal:\n" << err.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 }
 
 } // litetest

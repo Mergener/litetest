@@ -1,5 +1,5 @@
-#ifndef ILLUMINA_INTERNAL_H
-#define ILLUMINA_INTERNAL_H
+#ifndef LITETEST_INTERNAL_H
+#define LITETEST_INTERNAL_H
 
 #include <vector>
 #include <sstream>
@@ -16,6 +16,9 @@ struct TestCase {
     std::function<void()> function;
     std::string src_file;
     int line;
+
+    std::stringstream cout;
+    std::stringstream cerr;
 };
 
 struct TestSuite {
@@ -75,7 +78,6 @@ public:
         std::stringstream ss;
         ss << "Expected " << m_val << " to be different.";
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
-
     }
 
     void to_be_greater_than(const T& other) const {
@@ -131,4 +133,4 @@ private:
 
 }
 
-#endif // ILLUMINA_INTERNAL_H
+#endif // LITETEST_INTERNAL_H
