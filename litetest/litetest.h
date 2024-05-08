@@ -2,6 +2,7 @@
 #define LITETEST_H
 
 #include "internal.h"
+#include "stringify.h"
 
 namespace litetest {
 

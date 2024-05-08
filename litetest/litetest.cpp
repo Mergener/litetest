@@ -178,6 +178,11 @@ const TestSuite& current_suite(std::thread::id thread_id) {
     return *s_current_suite.at(thread_id);
 }
 
+<<<<<<< HEAD
+=======
+std::atomic_int g_assert_count = 0;
+
+>>>>>>> main
 } // internal
 using namespace internal;
 
@@ -343,7 +348,7 @@ static int run_mode_normal(const ProgramArgs& args) {
     std::cerr.flush();
 
     std::cout << "Testing finished." << std::endl;
-    std::cout << results.n_cases_passed << " of " << results.n_cases_executed << " passed." << std::endl;
+    std::cout << results.n_cases_passed << " of " << results.n_cases_executed << " passed (" << internal::g_assert_count << " total assertions made)." << std::endl;
     if (results.n_cases_incomplete) {
         std::cout << results.n_cases_incomplete << " threw an unexpected exception." << std::endl;
     }
