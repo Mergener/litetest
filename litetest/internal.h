@@ -1,6 +1,7 @@
-#ifndef ILLUMINA_INTERNAL_H
-#define ILLUMINA_INTERNAL_H
+#ifndef LITETEST_INTERNAL_H
+#define LITETEST_INTERNAL_H
 
+#include <atomic>
 #include <vector>
 #include <sstream>
 #include <string>
@@ -8,6 +9,8 @@
 #include <stdexcept>
 #include <optional>
 #include <thread>
+
+#include "stringify.h"
 
 namespace litetest::internal {
 
@@ -54,67 +57,75 @@ const TestCase& current_case(std::thread::id = std::this_thread::get_id());
 
 const TestSuite& current_suite(std::thread::id = std::this_thread::get_id());
 
+extern std::atomic_int g_assert_count;
+
 template<typename T>
 class ExpectValue {
 public:
-    void to_be(const T& other) const {
+    const ExpectValue& to_be(const T& other) const {
+        g_assert_count++;
         if (m_val == other) {
-            return;
+            return *this;
         }
 
         std::stringstream ss;
-        ss << "Expected " << other << ", got " << m_val;
+        ss << "Expected " << stringify(other) << ", got " << stringify(m_val);
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
-    void to_not_be(const T& other) const {
+    const ExpectValue& to_not_be(const T& other) const {
+        g_assert_count++;
         if (m_val != other) {
-            return;
+            return *this;
         }
 
         std::stringstream ss;
-        ss << "Expected " << m_val << " to be different.";
+        ss << "Expected " << stringify(m_val) << " to be different";
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
 
     }
 
-    void to_be_greater_than(const T& other) const {
+    const ExpectValue& to_be_greater_than(const T& other) const {
+        g_assert_count++;
         if (m_val > other) {
-            return;
+            return *this;
         }
 
         std::stringstream ss;
-        ss << "Expected value to be greater than " << other << ", got " << m_val;
+        ss << "Expected value to be greater than " << stringify(other) << ", got " << stringify(m_val);
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
-    void to_be_less_than(const T& other) const {
+    const ExpectValue& to_be_less_than(const T& other) const {
+        g_assert_count++;
         if (m_val < other) {
-            return;
+            return *this;
         }
 
         std::stringstream ss;
-        ss << "Expected value to be less than " << other << ", got " << m_val;
+        ss << "Expected value to be less than " << stringify(other) << ", got " << stringify(m_val);
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
-    void to_be_greater_than_or_equal_to(const T& other) const {
+    const ExpectValue& to_be_greater_than_or_equal_to(const T& other) const {
+        g_assert_count++;
         if (m_val >= other) {
-            return;
+            return *this;
         }
 
         std::stringstream ss;
-        ss << "Expected value to be greater than or equal to " << other << ", got " << m_val;
+        ss << "Expected value to be greater than or equal to " << stringify(other) << ", got " << stringify(m_val);
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
-    void to_be_less_than_or_equal_to(const T& other) const {
+    const ExpectValue& to_be_less_than_or_equal_to(const T& other) const {
+        g_assert_count++;
         if (m_val <= other) {
-            return;
+            return *this;
         }
 
         std::stringstream ss;
-        ss << "Expected value to be less than or equal to " << other << ", got " << m_val;
+        ss << "Expected value to be less than or equal to " << stringify(other) << ", got " << stringify(m_val);
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
     }
 
@@ -131,4 +142,4 @@ private:
 
 }
 
-#endif // ILLUMINA_INTERNAL_H
+#endif // LITETEST_INTERNAL_H
