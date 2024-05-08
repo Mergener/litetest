@@ -19,6 +19,9 @@ struct TestCase {
     std::function<void()> function;
     std::string src_file;
     int line;
+
+    std::stringstream cout;
+    std::stringstream cerr;
 };
 
 struct TestSuite {
@@ -82,7 +85,6 @@ public:
         std::stringstream ss;
         ss << "Expected " << stringify(m_val) << " to be different";
         throw TestFailure(ss.str(), current_case().name, current_suite().name, m_line);
-
     }
 
     const ExpectValue& to_be_greater_than(const T& other) const {
